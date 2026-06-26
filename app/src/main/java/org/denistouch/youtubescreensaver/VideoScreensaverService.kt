@@ -1,64 +1,124 @@
 package org.denistouch.youtubescreensaver
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.service.dreams.DreamService
-import android.webkit.WebChromeClient
 import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.preference.PreferenceManager
 
+/**
+ * Заставка (DreamService), проигрывающая видео YouTube во весь экран через
+ * YouTube IFrame Player JS API, загруженный в [WebView].
+ *
+ * Используется IFrame API (а не голый тег <iframe> и не сторонняя библиотека), чтобы
+ * программно запускать воспроизведение, зацикливать видео и скрывать элементы управления.
+ */
 class VideoScreensaverService : DreamService() {
-    private lateinit var webView: WebView
+
+    private var webView: WebView? = null
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
         isInteractive = false
         isFullscreen = true
         isScreenBright = true
-
-        setContentView(R.layout.main_layout)
-
-        webView = findViewById(R.id.webView)
-        setupWebView(
-            PreferenceManager.getDefaultSharedPreferences(this)
-                .getString("youtube.id", "") ?: ""
-        )
     }
 
     override fun onDreamingStarted() {
         super.onDreamingStarted()
-        Toast.makeText(baseContext, "Dreaming Started", Toast.LENGTH_SHORT).show()
+
+        val videoId = VideoStore(this).getSelectedVideoId()
+        if (videoId.isNullOrEmpty()) {
+            // Нет выбранного видео — показываем чёрный экран вместо падения.
+            return
+        }
+
+        val view = createWebView()
+        webView = view
+        setContentView(view)
+        view.loadDataWithBaseURL(
+            "https://www.youtube.com",
+            buildPlayerHtml(videoId),
+            "text/html",
+            "utf-8",
+            null,
+        )
     }
 
     override fun onDreamingStopped() {
         super.onDreamingStopped()
-        Toast.makeText(baseContext, "Dreaming Stopped", Toast.LENGTH_SHORT).show()
+        releaseWebView()
+    }
+
+    override fun onDetachedFromWindow() {
+        releaseWebView()
+        super.onDetachedFromWindow()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView(videoId: String) {
-        webView.apply {
-            settings.javaScriptEnabled = true
-            webChromeClient = object : WebChromeClient() {}
-            loadData(getYouTubeHTML(videoId), "text/html", "utf-8")
+    private fun createWebView(): WebView = WebView(this).apply {
+        setBackgroundColor(Color.BLACK)
+        settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            // Без этого WebView блокирует автозапуск видео без пользовательского жеста.
+            mediaPlaybackRequiresUserGesture = false
         }
     }
 
-    private fun getYouTubeHTML(videoId: String): String {
-        return """
-            <iframe 
-                width="560" 
-                height="315" 
-                src="https://www.youtube.com/embed/$videoId?si=4sJVtRvCUPTmkh93" 
-                title="YouTube video player" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen>
-            </iframe>
-        """.trimIndent()
+    private fun releaseWebView() {
+        webView?.apply {
+            loadUrl("about:blank")
+            stopLoading()
+            destroy()
+        }
+        webView = null
     }
+
+    /**
+     * HTML-страница c YouTube IFrame Player API. Видео занимает весь экран,
+     * автозапуск, зацикливание, без элементов управления.
+     */
+    private fun buildPlayerHtml(videoId: String): String = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+                #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+            </style>
+        </head>
+        <body>
+            <div id="player"></div>
+            <script src="https://www.youtube.com/iframe_api"></script>
+            <script>
+                var player;
+                function onYouTubeIframeAPIReady() {
+                    player = new YT.Player('player', {
+                        videoId: '$videoId',
+                        playerVars: {
+                            autoplay: 1,
+                            controls: 0,
+                            disablekb: 1,
+                            fs: 0,
+                            modestbranding: 1,
+                            rel: 0,
+                            playsinline: 1,
+                            loop: 1,
+                            playlist: '$videoId'
+                        },
+                        events: {
+                            onReady: function(e) { e.target.playVideo(); },
+                            onStateChange: function(e) {
+                                if (e.data === YT.PlayerState.ENDED) {
+                                    player.playVideo();
+                                }
+                            }
+                        }
+                    });
+                }
+            </script>
+        </body>
+        </html>
+    """.trimIndent()
 }

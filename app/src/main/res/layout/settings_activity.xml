@@ -1,5 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/settings_container"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#202020"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_title"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:paddingBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="24dp">
+
+        <EditText
+            android:id="@+id/urlInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/url_hint"
+            android:textColorHint="#888888"
+            android:textColor="#FFFFFF"
+            android:inputType="textUri"
+            android:imeOptions="actionDone"
+            android:maxLines="1" />
+
+        <Button
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/add_button" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/emptyHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/empty_list_hint"
+        android:textColor="#888888"
+        android:textSize="16sp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/videoList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false" />
+
+</LinearLayout>

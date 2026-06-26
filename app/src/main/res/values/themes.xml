@@ -1,3 +1,5 @@
 <resources>
-    <style name="Theme.YoutubeScreensaver" parent="@style/Theme.AppCompat" />
+    <!-- Активность настроек наследует AppCompatActivity, поэтому тема должна быть AppCompat.
+         Theme.Leanback не является AppCompat-темой и приводит к падению AppCompatActivity. -->
+    <style name="Theme.YoutubeScreensaver" parent="Theme.AppCompat.NoActionBar" />
 </resources>
