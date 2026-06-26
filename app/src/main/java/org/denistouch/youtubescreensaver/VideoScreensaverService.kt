@@ -1,16 +1,15 @@
 package org.denistouch.youtubescreensaver
 
-import android.annotation.SuppressLint
-import android.graphics.Color
 import android.service.dreams.DreamService
 import android.webkit.WebView
 
 /**
  * Заставка (DreamService), проигрывающая видео YouTube во весь экран через
- * YouTube IFrame Player JS API, загруженный в [WebView].
+ * YouTube IFrame Player JS API (см. [YoutubePlayer]).
  *
- * Используется IFrame API (а не голый тег <iframe> и не сторонняя библиотека), чтобы
- * программно запускать воспроизведение, зацикливать видео и скрывать элементы управления.
+ * Примечание: на Android TV / Google TV системное меню «Спящий режим» не показывает
+ * сторонние (sideload) заставки. Чтобы запустить воспроизведение вручную без ADB,
+ * используется [PlayerActivity] (кнопка в настройках).
  */
 class VideoScreensaverService : DreamService() {
 
@@ -32,16 +31,10 @@ class VideoScreensaverService : DreamService() {
             return
         }
 
-        val view = createWebView()
+        val view = YoutubePlayer.createWebView(this)
         webView = view
         setContentView(view)
-        view.loadDataWithBaseURL(
-            "https://www.youtube.com",
-            buildPlayerHtml(videoId),
-            "text/html",
-            "utf-8",
-            null,
-        )
+        YoutubePlayer.load(view, videoId)
     }
 
     override fun onDreamingStopped() {
@@ -54,71 +47,8 @@ class VideoScreensaverService : DreamService() {
         super.onDetachedFromWindow()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun createWebView(): WebView = WebView(this).apply {
-        setBackgroundColor(Color.BLACK)
-        settings.apply {
-            javaScriptEnabled = true
-            domStorageEnabled = true
-            // Без этого WebView блокирует автозапуск видео без пользовательского жеста.
-            mediaPlaybackRequiresUserGesture = false
-        }
-    }
-
     private fun releaseWebView() {
-        webView?.apply {
-            loadUrl("about:blank")
-            stopLoading()
-            destroy()
-        }
+        webView?.let { YoutubePlayer.release(it) }
         webView = null
     }
-
-    /**
-     * HTML-страница c YouTube IFrame Player API. Видео занимает весь экран,
-     * автозапуск, зацикливание, без элементов управления.
-     */
-    private fun buildPlayerHtml(videoId: String): String = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <style>
-                html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
-                #player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-            </style>
-        </head>
-        <body>
-            <div id="player"></div>
-            <script src="https://www.youtube.com/iframe_api"></script>
-            <script>
-                var player;
-                function onYouTubeIframeAPIReady() {
-                    player = new YT.Player('player', {
-                        videoId: '$videoId',
-                        playerVars: {
-                            autoplay: 1,
-                            controls: 0,
-                            disablekb: 1,
-                            fs: 0,
-                            modestbranding: 1,
-                            rel: 0,
-                            playsinline: 1,
-                            loop: 1,
-                            playlist: '$videoId'
-                        },
-                        events: {
-                            onReady: function(e) { e.target.playVideo(); },
-                            onStateChange: function(e) {
-                                if (e.data === YT.PlayerState.ENDED) {
-                                    player.playVideo();
-                                }
-                            }
-                        }
-                    });
-                }
-            </script>
-        </body>
-        </html>
-    """.trimIndent()
 }

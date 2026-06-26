@@ -1,6 +1,9 @@
 package org.denistouch.youtubescreensaver
 
 import android.os.Bundle
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -50,6 +53,7 @@ class ScreensaverSettingsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.addButton).setOnClickListener { onAddClicked() }
+        findViewById<Button>(R.id.playButton).setOnClickListener { onOpenDreamSettings() }
 
         refreshList()
     }
@@ -85,6 +89,25 @@ class ScreensaverSettingsActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun onOpenDreamSettings() {
+        // На Google TV / Android 12+ пункт выбора заставки убран из видимого меню,
+        // но экран остаётся доступен по интенту. Пробуем несколько вариантов.
+        val candidates = listOf(
+            Intent("android.settings.DREAM_SETTINGS"),
+            Intent(Settings.ACTION_DISPLAY_SETTINGS),
+            Intent(Settings.ACTION_SETTINGS),
+        )
+        for (intent in candidates) {
+            try {
+                startActivity(intent)
+                return
+            } catch (_: ActivityNotFoundException) {
+                // пробуем следующий
+            }
+        }
+        Toast.makeText(this, R.string.dream_settings_unavailable, Toast.LENGTH_LONG).show()
     }
 
     private fun refreshList() {

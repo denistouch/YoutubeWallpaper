@@ -9,4 +9,6 @@
     <string name="invalid_url">Не удалось распознать ссылку YouTube</string>
     <string name="selected_toast">Выбрано: %1$s</string>
     <string name="selected_mark">Выбранное видео</string>
+    <string name="play_now_button">Открыть системные настройки заставки</string>
+    <string name="dream_settings_unavailable">Не удалось открыть настройки заставки на этом устройстве</string>
 </resources>
