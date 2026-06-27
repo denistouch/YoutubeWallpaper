@@ -3,14 +3,23 @@ package org.denistouch.youtubescreensaver
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
+import androidx.webkit.WebViewMediaIntegrityApiStatusConfig
 
 /**
  * Общая логика воспроизведения YouTube-видео во весь экран через IFrame Player JS API
- * в [WebView]. Используется и заставкой ([VideoScreensaverService]), и ручным запуском
- * ([PlayerActivity]), чтобы не дублировать настройку WebView и HTML плеера.
+ * в [WebView]. Используется и заставкой ([VideoScreensaverService]), и ручным запуском,
+ * чтобы не дублировать настройку WebView и HTML плеера.
  */
 object YoutubePlayer {
+
+    /** Тег для logcat: `adb logcat -s YoutubePlayer`. */
+    const val TAG = "YoutubePlayer"
 
     /** Создаёт настроенный для автозапуска видео [WebView] на чёрном фоне. */
     @SuppressLint("SetJavaScriptEnabled")
@@ -21,13 +30,31 @@ object YoutubePlayer {
             domStorageEnabled = true
             // Без этого WebView блокирует автозапуск видео без пользовательского жеста.
             mediaPlaybackRequiresUserGesture = false
+            // YouTube отдаёт «обрезанный» плеер для TV/mobile UA — притворяемся десктопом.
+            userAgentString = DESKTOP_UA
+        }
+        // Выключаем WebView Media Integrity API: sideload-сборка не проходит аттестацию,
+        // из-за чего YouTube отдаёт onError 152 на любом видео. Без токена плеер
+        // откатывается к обычным правилам web-embed.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEBVIEW_MEDIA_INTEGRITY_API_STATUS)) {
+            val config = WebViewMediaIntegrityApiStatusConfig.Builder(
+                WebViewMediaIntegrityApiStatusConfig.WEBVIEW_MEDIA_INTEGRITY_API_DISABLED,
+            ).build()
+            WebSettingsCompat.setWebViewMediaIntegrityApiStatus(settings, config)
+        }
+        // Пробрасываем console.* плеера в logcat — иначе ошибки YouTube не видны.
+        webChromeClient = object : WebChromeClient() {
+            override fun onConsoleMessage(msg: ConsoleMessage): Boolean {
+                Log.i(TAG, "console: ${msg.message()} @ ${msg.sourceId()}:${msg.lineNumber()}")
+                return true
+            }
         }
     }
 
     /** Загружает видео [videoId] в [webView]. */
     fun load(webView: WebView, videoId: String) {
         webView.loadDataWithBaseURL(
-            "https://www.youtube.com",
+            BASE_URL,
             buildHtml(videoId),
             "text/html",
             "utf-8",
@@ -44,9 +71,21 @@ object YoutubePlayer {
         }
     }
 
+    /** Origin страницы (совпадает с baseUrl в [load]) — нужен IFrame API для проверки.
+     * Нейтральный сторонний домен: с origin youtube.com плеер считает нас «первой
+     * стороной» и падает на проверке (onError 152). */
+    private const val BASE_URL = "https://www.example.com"
+
+    /** Десктопный Chrome UA, чтобы YouTube не подсовывал TV/mobile-вариант плеера. */
+    private const val DESKTOP_UA =
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
     /**
      * HTML-страница c YouTube IFrame Player API. Видео занимает весь экран,
      * автозапуск, зацикливание, без элементов управления.
+     *
+     * Плеер грузим с `youtube-nocookie.com` и передаём `origin` — это повышает шанс
+     * пройти проверки встраивания (ошибки 15x). Любую ошибку плеера логируем через console.
      */
     private fun buildHtml(videoId: String): String = """
         <!DOCTYPE html>
@@ -75,7 +114,9 @@ object YoutubePlayer {
                             rel: 0,
                             playsinline: 1,
                             loop: 1,
-                            playlist: '$videoId'
+                            playlist: '$videoId',
+                            enablejsapi: 1,
+                            origin: '$BASE_URL'
                         },
                         events: {
                             onReady: function(e) { e.target.playVideo(); },
@@ -83,6 +124,9 @@ object YoutubePlayer {
                                 if (e.data === YT.PlayerState.ENDED) {
                                     player.playVideo();
                                 }
+                            },
+                            onError: function(e) {
+                                console.error('YT onError code=' + e.data);
                             }
                         }
                     });

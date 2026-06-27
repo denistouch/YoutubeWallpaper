@@ -3,7 +3,6 @@ package org.denistouch.youtubescreensaver
 import android.os.Bundle
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -92,12 +91,16 @@ class ScreensaverSettingsActivity : AppCompatActivity() {
     }
 
     private fun onOpenDreamSettings() {
-        // На Google TV / Android 12+ пункт выбора заставки убран из видимого меню,
-        // но экран остаётся доступен по интенту. Пробуем несколько вариантов.
+        // На Android TV 12 пункт выбора заставки убран из видимого меню, но сам экран
+        // (DaydreamActivity в TvSettings) помечен exported=true и запускается напрямую
+        // по имени компонента. Действие DREAM_SETTINGS на части прошивок не резолвится,
+        // поэтому сначала пробуем явный компонент, затем — стандартные действия.
         val candidates = listOf(
+            Intent().setClassName(
+                "com.android.tv.settings",
+                "com.android.tv.settings.device.display.daydream.DaydreamActivity",
+            ),
             Intent("android.settings.DREAM_SETTINGS"),
-            Intent(Settings.ACTION_DISPLAY_SETTINGS),
-            Intent(Settings.ACTION_SETTINGS),
         )
         for (intent in candidates) {
             try {
@@ -105,6 +108,8 @@ class ScreensaverSettingsActivity : AppCompatActivity() {
                 return
             } catch (_: ActivityNotFoundException) {
                 // пробуем следующий
+            } catch (_: SecurityException) {
+                // компонент есть, но запуск запрещён — пробуем следующий
             }
         }
         Toast.makeText(this, R.string.dream_settings_unavailable, Toast.LENGTH_LONG).show()
