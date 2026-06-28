@@ -115,4 +115,4 @@ adb shell am start -n com.android.systemui/.Somnambulator
 **Embed-ограничения YouTube.** Некоторые видео запрещены правообладателем для
 встраивания — плеер вернёт ошибку 101 или 150. Это ограничение YouTube, не приложения.
 
-[Android](/app/build/outputs/apk/debug/app-debug.apk?raw=true)
+[Android](/app/build/outputs/apk/debug/app-debug.apk)
