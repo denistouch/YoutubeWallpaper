@@ -1,88 +1,116 @@
 # Youtube Screensaver (Android TV)
 
-Заставка (DreamService) для Android TV, проигрывающая видео YouTube во весь экран
+Заставка (`DreamService`) для Android TV, проигрывающая YouTube-видео во весь экран
 через YouTube IFrame Player JS API в `WebView`.
 
 Пакет: `org.denistouch.youtubescreensaver`
 
 ## Возможности
 
-- Добавление видео по любой ссылке YouTube (`watch?v=`, `youtu.be/`, `embed/`, `shorts/`,
-  `live/`, голый id) — id извлекается автоматически ([`YoutubeUrlParser`](app/src/main/java/org/denistouch/youtubescreensaver/YoutubeUrlParser.kt)).
-- Название видео подтягивается из публичного oEmbed-эндпоинта YouTube (без API-ключа).
-- Список сохранённых видео в настройках: выбор активного видео, удаление.
-- Воспроизведение во весь экран с автозапуском и зацикливанием, без элементов управления.
+- Добавление видео по ссылке YouTube (`watch?v=`, `youtu.be/`, `embed/`, `shorts/`, `live/`)
+  или по голому 11-символьному ID — извлекается автоматически.
+- Добавление видео с телефона: приложение поднимает локальный HTTP-сервер (порт 18080),
+  показывает QR-код; телефон сканирует, открывает форму в браузере, вставляет ссылку.
+- Название видео подтягивается из oEmbed YouTube без API-ключа.
+- Список видео с превью-миниатюрами, выбор активного, удаление.
+- Кнопка «Сделать активной заставкой» — назначает приложение системной заставкой
+  без ADB (требует разового `pm grant`, см. ниже).
+- Выбор времени простоя до запуска заставки.
+- Воспроизведение во весь экран: автозапуск, зацикливание, без элементов управления.
 
 ## Требования к окружению
 
-- JDK 17
-- Android SDK: platform-34, build-tools 34.0.0, platform-tools
-- Путь к SDK укажите в `local.properties` (файл в `.gitignore`):
-  ```
-  sdk.dir=/opt/homebrew/share/android-commandlinetools
-  ```
+| Инструмент | Версия |
+|---|---|
+| JDK | 17 |
+| Android SDK platform | 34 |
+| Android SDK build-tools | 34.0.0 |
+| Gradle (wrapper) | 8.7 |
 
-## Сборка и тесты
+Укажите путь к SDK в `local.properties` (файл в `.gitignore`):
 
-```bash
-# Unit-тесты парсера ссылок
-./gradlew testDebugUnitTest
-
-# Debug APK -> app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleDebug
+```
+sdk.dir=/opt/homebrew/share/android-commandlinetools
 ```
 
-## Запуск на эмуляторе Android TV
+## Сборка
 
-1. Установите образ системы Android TV и создайте AVD (через `sdkmanager`/`avdmanager` или
-   Android Studio → Device Manager → Television):
-   ```bash
-   export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
-   sdkmanager "system-images;android-34;android-tv;arm64-v8a"   # для Apple Silicon
-   avdmanager create avd -n tv34 -k "system-images;android-34;android-tv;arm64-v8a" -d tv_1080p
-   $ANDROID_HOME/emulator/emulator -avd tv34
-   ```
-   (пакет `emulator` ставится отдельно: `sdkmanager "emulator"`.)
+```bash
+# Debug APK → app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleDebug
 
-2. Установите приложение:
-   ```bash
-   ./gradlew installDebug
-   # или: adb install -r app/build/outputs/apk/debug/app-debug.apk
-   ```
+# Юнит-тесты парсера ссылок
+./gradlew testDebugUnitTest
+```
 
-3. Откройте приложение «Youtube Screensaver» из лаунчера, вставьте ссылку на видео,
-   нажмите «Добавить» и выберите видео из списка.
+## Установка на реальное устройство
 
-4. Проверьте заставку:
-   - назначьте её системной: **Настройки → Система → Заставка → Youtube Screensaver**;
-   - запустите немедленно для проверки:
-     ```bash
-     adb shell am start -n com.android.systemui/.Somnambulator
-     ```
+### 1. Включить ADB на ТВ
 
-## Установка dev-сборки на реальное устройство (Android TV / приставка)
+**Настройки → О устройстве** — 7 раз нажать «Сборка» (режим разработчика).  
+**Настройки → Система → Для разработчиков** — включить **Отладку по сети (ADB)**.
 
-1. На устройстве включите режим разработчика: **Настройки → Об устройстве** → 7 раз нажмите
-   на «Сборка», затем в **Настройки → Система → Для разработчиков** включите
-   **Отладку по USB / по сети (ADB)**.
+```bash
+adb connect <IP_телевизора>:5555
+adb devices   # убедиться что устройство в списке
+```
 
-2. Подключитесь по сети (у TV-приставок обычно нет USB-host):
-   ```bash
-   adb connect <IP_приставки>:5555
-   adb devices            # убедитесь, что устройство в списке
-   ```
+### 2. Установить APK
 
-3. Установите APK:
-   ```bash
-   adb -s <IP_приставки>:5555 install -r app/build/outputs/apk/debug/app-debug.apk
-   ```
+```bash
+adb -s <IP>:5555 install -r app/build/outputs/apk/debug/app-debug.apk
+```
 
-4. Назначьте заставку в **Настройки → Система → Заставка** и задайте время запуска.
+> **Важно (TCL и ряд других прошивок):** после установки откройте приложение вручную
+> из лаунчера, прежде чем пытаться запустить заставку. Прошивка блокирует bind
+> `DreamService` пока приложение находится в состоянии «stopped».
 
-## Примечания
+### 3. Выдать разрешение (один раз)
 
-- Автозапуск видео в `WebView` обеспечивается флагом
-  `mediaPlaybackRequiresUserGesture = false` и загрузкой страницы через
-  `loadDataWithBaseURL("https://www.youtube.com", …)` (корректный Referer для IFrame API).
-- Некоторые видео могут быть запрещены правообладателем для встраивания — тогда плеер
-  покажет ошибку. Это ограничение YouTube, а не приложения.
+Для кнопок «Сделать активной заставкой» и «Применить» (таймаут) нужно привилегированное
+разрешение `WRITE_SECURE_SETTINGS`. Выдаётся один раз с компьютера:
+
+```bash
+adb shell pm grant org.denistouch.youtubescreensaver android.permission.WRITE_SECURE_SETTINGS
+```
+
+После этого обе функции работают прямо из приложения без ADB.
+
+### 4. Назначить заставку вручную (альтернатива)
+
+Если кнопка недоступна или нужно сделать через ADB:
+
+```bash
+adb shell settings put secure screensaver_components \
+    org.denistouch.youtubescreensaver/.VideoScreensaverService
+adb shell settings put secure screensaver_enabled 1
+adb shell settings put secure screensaver_activate_on_sleep 1
+adb shell settings put system screen_off_timeout 360000   # 6 минут, минимум на Android 12
+```
+
+### 5. Проверить заставку немедленно
+
+```bash
+adb shell am start -n com.android.systemui/.Somnambulator
+```
+
+## Добавление видео с телефона (QR)
+
+1. Откройте приложение на ТВ → нажмите **«Добавить с телефона (QR)»**.
+2. Отсканируйте QR-код телефоном (телефон и ТВ должны быть в одной Wi-Fi сети).
+3. В открывшемся браузере вставьте ссылку на YouTube-видео и нажмите **Добавить**.
+
+Видео появится в списке на ТВ без пульта и ввода с экранной клавиатуры.
+
+## Технические примечания
+
+**Origin WebView.** `loadDataWithBaseURL` должен использовать нейтральный сторонний
+домен (`https://www.example.com`), то же значение передаётся в `playerVars.origin`.
+Если указать `https://www.youtube.com` — плеер считает страницу «первой стороной»
+и возвращает ошибку 152 на всех видео без исключения.
+
+**Android 12 / Google TV.** Сторонние заставки не отображаются в системном меню
+выбора заставки. Назначение — через кнопку в приложении (после `pm grant`) или ADB.
+
+**Embed-ограничения YouTube.** Некоторые видео запрещены правообладателем для
+встраивания — плеер вернёт ошибку 101 или 150. Это ограничение YouTube, не приложения.

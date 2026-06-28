@@ -9,10 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 
-/**
- * Список сохранённых видео. Нажатие на строку делает видео выбранным,
- * кнопка удаления — убирает его из списка.
- */
 class VideoAdapter(
     private var videos: List<Video>,
     private var selectedId: String?,
@@ -21,6 +17,7 @@ class VideoAdapter(
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardContent: View = view.findViewById(R.id.cardContent)
         val thumbnail: ImageView = view.findViewById(R.id.thumbnail)
         val title: TextView = view.findViewById(R.id.videoTitle)
         val selectedMark: ImageView = view.findViewById(R.id.selectedMark)
@@ -39,8 +36,8 @@ class VideoAdapter(
         holder.thumbnail.load("https://i.ytimg.com/vi/${video.id}/mqdefault.jpg")
         val isSelected = video.id == selectedId
         holder.selectedMark.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
-        holder.itemView.isSelected = isSelected
-        holder.itemView.setOnClickListener { onSelect(video) }
+        holder.cardContent.isSelected = isSelected
+        holder.cardContent.setOnClickListener { onSelect(video) }
         holder.deleteButton.setOnClickListener { onDelete(video) }
     }
 
