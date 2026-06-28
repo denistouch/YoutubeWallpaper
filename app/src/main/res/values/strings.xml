@@ -1,9 +1,13 @@
 <resources>
     <string name="app_name">Youtube Screensaver</string>
 
+    <string name="screen_title">Заставка YouTube</string>
+    <string name="section_video">Видео</string>
+    <string name="section_screensaver">Заставка</string>
     <string name="settings_title">Видео для заставки</string>
-    <string name="url_hint">Вставьте ссылку на видео YouTube</string>
+    <string name="url_hint">Ссылка или ID видео YouTube</string>
     <string name="add_button">Добавить</string>
+    <string name="add_manually_button">Вручную</string>
     <string name="delete_button">Удалить</string>
     <string name="empty_list_hint">Список пуст. Добавьте видео по ссылке выше.</string>
     <string name="invalid_url">Не удалось распознать ссылку YouTube</string>
@@ -11,4 +15,28 @@
     <string name="selected_mark">Выбранное видео</string>
     <string name="play_now_button">Открыть системные настройки заставки</string>
     <string name="dream_settings_unavailable">Не удалось открыть настройки заставки на этом устройстве</string>
+
+    <string name="status_checking">Проверка состояния…</string>
+    <string name="make_active_button">Сделать активной заставкой</string>
+    <string name="timeout_label">Время простоя до заставки (мин):</string>
+    <string name="timeout_value">%1$d мин</string>
+    <string name="apply_button">Применить</string>
+    <string name="status_active">✓ Активна: это приложение назначено заставкой</string>
+    <string name="status_other">Заставка назначена на другое приложение</string>
+    <string name="status_none">Заставка не назначена</string>
+    <string name="status_perm_ok">Разрешение WRITE_SECURE_SETTINGS выдано — можно назначать из приложения</string>
+    <string name="status_perm_missing">Нет разрешения WRITE_SECURE_SETTINGS. Выполни ОДИН раз на компьютере с adb:\n%1$s</string>
+    <string name="make_active_ok">Готово: приложение назначено активной заставкой</string>
+    <string name="make_active_no_perm">Сначала выдай разрешение командой adb (см. статус выше)</string>
+    <string name="timeout_ok">Таймаут установлен: %1$d мин</string>
+    <string name="timeout_min_warning">Минимум 6 минут (Android 12 меньшие значения игнорирует)</string>
+    <string name="timeout_invalid">Введите число минут</string>
+    <string name="timeout_need_perm">Для записи таймаута нужно то же разрешение. Выполни один раз на компьютере:\n%1$s</string>
+
+    <string name="add_from_phone_button">Добавить с телефона (QR)</string>
+    <string name="phone_add_dialog_title">Откройте на телефоне</string>
+    <string name="phone_add_hint">Телефон должен быть в той же сети Wi-Fi, что и ТВ</string>
+    <string name="phone_add_no_network">Сеть недоступна — подключите ТВ к Wi-Fi</string>
+    <string name="phone_add_server_error">Не удалось запустить сервер (порт %1$d занят?)</string>
+    <string name="phone_add_added">Добавлено: %1$s</string>
 </resources>

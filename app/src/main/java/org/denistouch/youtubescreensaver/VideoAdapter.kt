@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 
 /**
  * Список сохранённых видео. Нажатие на строку делает видео выбранным,
@@ -20,6 +21,7 @@ class VideoAdapter(
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val thumbnail: ImageView = view.findViewById(R.id.thumbnail)
         val title: TextView = view.findViewById(R.id.videoTitle)
         val selectedMark: ImageView = view.findViewById(R.id.selectedMark)
         val deleteButton: Button = view.findViewById(R.id.deleteButton)
@@ -34,6 +36,7 @@ class VideoAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = videos[position]
         holder.title.text = video.title
+        holder.thumbnail.load("https://i.ytimg.com/vi/${video.id}/mqdefault.jpg")
         val isSelected = video.id == selectedId
         holder.selectedMark.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
         holder.itemView.isSelected = isSelected

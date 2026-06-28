@@ -1,5 +1,16 @@
 <resources>
-    <color name="item_default">#2E2E2E</color>
-    <color name="item_focused">#3F6FD8</color>
+    <!-- Базовая палитра (тёмная, «с трёх метров») -->
+    <color name="bg">#0F1216</color>
+    <color name="surface">#1A1F27</color>
+    <color name="surface_variant">#252C36</color>
+    <color name="accent">#5AA0FF</color>
+    <color name="accent_dim">#1E3A66</color>
+    <color name="on_surface">#E7EBF1</color>
+    <color name="on_surface_muted">#9AA3B0</color>
+    <color name="success">#54D08A</color>
+
+    <!-- Состояния элементов списка -->
+    <color name="item_default">#1A1F27</color>
+    <color name="item_focused">#2E3947</color>
     <color name="item_selected">#1E3A66</color>
 </resources>
