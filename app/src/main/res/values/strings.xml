@@ -1,19 +1,42 @@
 <resources>
     <string name="app_name">Youtube Screensaver</string>
-    <string name="browse_title">Videos by Your Company</string>
-    <string name="related_movies">Related Videos</string>
-    <string name="grid_view">Grid View</string>
-    <string name="error_fragment">Error Fragment</string>
-    <string name="personal_settings">Personal Settings</string>
-    <string name="watch_trailer_1">Watch trailer</string>
-    <string name="watch_trailer_2">FREE</string>
-    <string name="rent_1">Rent By Day</string>
-    <string name="rent_2">From $1.99</string>
-    <string name="buy_1">Buy and Own</string>
-    <string name="buy_2">AT $9.99</string>
-    <string name="movie">Movie</string>
 
-    <!-- Error messages -->
-    <string name="error_fragment_message">An error occurred</string>
-    <string name="dismiss_error">Dismiss</string>
+    <string name="screen_title">Заставка YouTube</string>
+    <string name="section_video">Видео</string>
+    <string name="section_screensaver">Заставка</string>
+    <string name="settings_title">Видео для заставки</string>
+    <string name="url_hint">Ссылка или ID видео YouTube</string>
+    <string name="add_button">Добавить</string>
+    <string name="add_manually_button">Вручную</string>
+    <string name="delete_button">Удалить</string>
+    <string name="empty_list_hint">Список пуст. Добавьте видео по ссылке выше.</string>
+    <string name="invalid_url">Не удалось распознать ссылку YouTube</string>
+    <string name="selected_toast">Выбрано: %1$s</string>
+    <string name="selected_mark">Выбранное видео</string>
+    <string name="play_now_button">Открыть системные настройки заставки</string>
+    <string name="dream_settings_unavailable">Не удалось открыть настройки заставки на этом устройстве</string>
+
+    <string name="status_checking">Проверка состояния…</string>
+    <string name="make_active_button">Сделать активной заставкой</string>
+    <string name="timeout_label">Время простоя до заставки (мин):</string>
+    <string name="timeout_value">%1$d мин</string>
+    <string name="apply_button">Применить</string>
+    <string name="status_active">✓ Активна: это приложение назначено заставкой</string>
+    <string name="status_other">Заставка назначена на другое приложение</string>
+    <string name="status_none">Заставка не назначена</string>
+    <string name="status_perm_ok">Разрешение WRITE_SECURE_SETTINGS выдано — можно назначать из приложения</string>
+    <string name="status_perm_missing">Нет разрешения WRITE_SECURE_SETTINGS. Выполни ОДИН раз на компьютере с adb:\n%1$s</string>
+    <string name="make_active_ok">Готово: приложение назначено активной заставкой</string>
+    <string name="make_active_no_perm">Сначала выдай разрешение командой adb (см. статус выше)</string>
+    <string name="timeout_ok">Таймаут установлен: %1$d мин</string>
+    <string name="timeout_min_warning">Минимум 6 минут (Android 12 меньшие значения игнорирует)</string>
+    <string name="timeout_invalid">Введите число минут</string>
+    <string name="timeout_need_perm">Для записи таймаута нужно то же разрешение. Выполни один раз на компьютере:\n%1$s</string>
+
+    <string name="add_from_phone_button">Добавить с телефона (QR)</string>
+    <string name="phone_add_dialog_title">Откройте на телефоне</string>
+    <string name="phone_add_hint">Телефон должен быть в той же сети Wi-Fi, что и ТВ</string>
+    <string name="phone_add_no_network">Сеть недоступна — подключите ТВ к Wi-Fi</string>
+    <string name="phone_add_server_error">Не удалось запустить сервер (порт %1$d занят?)</string>
+    <string name="phone_add_added">Добавлено: %1$s</string>
 </resources>

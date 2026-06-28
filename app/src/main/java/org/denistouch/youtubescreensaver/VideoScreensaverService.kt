@@ -1,64 +1,54 @@
 package org.denistouch.youtubescreensaver
 
-import android.annotation.SuppressLint
 import android.service.dreams.DreamService
-import android.webkit.WebChromeClient
 import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.preference.PreferenceManager
 
+/**
+ * Заставка (DreamService), проигрывающая видео YouTube во весь экран через
+ * YouTube IFrame Player JS API (см. [YoutubePlayer]).
+ *
+ * Примечание: на Android TV / Google TV системное меню «Спящий режим» не показывает
+ * сторонние (sideload) заставки. Чтобы запустить воспроизведение вручную без ADB,
+ * используется [PlayerActivity] (кнопка в настройках).
+ */
 class VideoScreensaverService : DreamService() {
-    private lateinit var webView: WebView
+
+    private var webView: WebView? = null
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-
         isInteractive = false
         isFullscreen = true
         isScreenBright = true
-
-        setContentView(R.layout.main_layout)
-
-        webView = findViewById(R.id.webView)
-        setupWebView(
-            PreferenceManager.getDefaultSharedPreferences(this)
-                .getString("youtube.id", "") ?: ""
-        )
     }
 
     override fun onDreamingStarted() {
         super.onDreamingStarted()
-        Toast.makeText(baseContext, "Dreaming Started", Toast.LENGTH_SHORT).show()
+
+        val videoId = VideoStore(this).getSelectedVideoId()
+        if (videoId.isNullOrEmpty()) {
+            // Нет выбранного видео — показываем чёрный экран вместо падения.
+            return
+        }
+
+        val view = YoutubePlayer.createWebView(this)
+        webView = view
+        setContentView(view)
+        YoutubePlayer.load(view, videoId)
     }
 
     override fun onDreamingStopped() {
         super.onDreamingStopped()
-        Toast.makeText(baseContext, "Dreaming Stopped", Toast.LENGTH_SHORT).show()
+        releaseWebView()
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView(videoId: String) {
-        webView.apply {
-            settings.javaScriptEnabled = true
-            webChromeClient = object : WebChromeClient() {}
-            loadData(getYouTubeHTML(videoId), "text/html", "utf-8")
-        }
+    override fun onDetachedFromWindow() {
+        releaseWebView()
+        super.onDetachedFromWindow()
     }
 
-    private fun getYouTubeHTML(videoId: String): String {
-        return """
-            <iframe 
-                width="560" 
-                height="315" 
-                src="https://www.youtube.com/embed/$videoId?si=4sJVtRvCUPTmkh93" 
-                title="YouTube video player" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                referrerpolicy="strict-origin-when-cross-origin" 
-                allowfullscreen>
-            </iframe>
-        """.trimIndent()
+    private fun releaseWebView() {
+        webView?.let { YoutubePlayer.release(it) }
+        webView = null
     }
 }

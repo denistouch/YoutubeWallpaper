@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.denistouch.youtubescreensaver">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Назначение себя системной заставкой (Settings.Secure). Выдаётся ТОЛЬКО через adb:
+         pm grant <pkg> android.permission.WRITE_SECURE_SETTINGS -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <!-- Изменение времени простоя (Settings.System). Выдаётся пользователем из UI. -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -17,6 +24,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:theme="@style/Theme.YoutubeScreensaver"
         android:banner="@drawable/app_icon_your_company">
         <!-- Активность для настроек -->
         <activity
@@ -37,10 +45,6 @@
                 <action android:name="android.service.dreams.DreamService" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <!-- Point to additional information for this dream (optional) -->
-            <meta-data
-                android:name="android.service.dream"
-                android:resource="@xml/my_dream" />
         </service>
     </application>
 

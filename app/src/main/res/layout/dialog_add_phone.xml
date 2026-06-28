@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingHorizontal="32dp"
+    android:paddingVertical="24dp">
+
+    <ImageView
+        android:id="@+id/qrImage"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:contentDescription="QR-код для добавления видео" />
+
+    <TextView
+        android:id="@+id/serverUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:background="@drawable/bg_input"
+        android:textColor="@color/on_surface"
+        android:textSize="15sp"
+        android:textIsSelectable="true"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/phone_add_hint"
+        android:textColor="@color/on_surface_muted"
+        android:textSize="13sp"
+        android:gravity="center" />
+
+</LinearLayout>

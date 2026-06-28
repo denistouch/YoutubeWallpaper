@@ -1,3 +1,39 @@
 <resources>
-    <style name="Theme.YoutubeScreensaver" parent="@style/Theme.AppCompat" />
+    <!-- Material3-тёмная тема. Совместима с AppCompatActivity (Material расширяет AppCompat),
+         в отличие от Theme.Leanback, которая роняет AppCompatActivity. -->
+    <style name="Theme.YoutubeScreensaver" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">#08111E</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="android:windowBackground">@color/bg</item>
+    </style>
+
+    <!-- Заголовок секции: акцент, верхний регистр, разрядка. -->
+    <style name="SectionHeader">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.12</item>
+    </style>
+
+    <!-- Основная (filled) кнопка действия. -->
+    <style name="PrimaryButton" parent="Widget.Material3.Button">
+        <item name="android:textSize">16sp</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+
+    <!-- Второстепенная (outlined) кнопка. -->
+    <style name="SecondaryButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textSize">15sp</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+
+    <!-- Скругление превью-миниатюры. -->
+    <style name="ThumbShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
 </resources>
